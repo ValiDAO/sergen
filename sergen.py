@@ -189,6 +189,8 @@ def regenerate_grafana_dashboards(config):
     row = 0
     panels = []
     for project in sorted(all_projects):
+        if not (pathlib.Path(NODES_PATH) / project / "grafana_generator.py").exists():
+            continue
         gen = importlib.import_module(f"{project}.grafana_generator")
         transformations = _generate_grafana_transformations(config, project)
         new_panels = gen.generate_section(len(panels), row, servers=None)  # admin
