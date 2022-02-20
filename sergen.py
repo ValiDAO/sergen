@@ -16,6 +16,7 @@ SSH_CONFIG_PATH = "/root/.ssh/config"
 ANSIBLE_INVENTORY_PATH = "/etc/ansible/hosts"
 GRAFANA_DASHBOARDS_PATH = pathlib.Path("/var/lib/grafana-dashboards")
 PROMETHEUS_PATH = "/root/prometheus.yml"
+PROMETHEUS_ALERTS_PATH = "/root/alert_rules.yml"
 
 
 def _prepare_file(path):
@@ -115,6 +116,23 @@ def regenerate_ansible_inventory(config):
         inventory_file.write(inventory)
 
 
+def generate_alerts(config):
+    with open(PROMETHEUS_ALERTS_PATH, "w") as alerts_config:
+        alerts_config.write("""
+groups:
+- name: example_alerting_group
+  rules:
+  - alert: Data Collector is down
+    expr: up == 1
+    for: 1s
+    labels:
+      severity: page
+    annotations:
+      summary: Data Collector is Down
+""")
+
+
+
 def regenerate_prometheus_config(config):
     CONFIG_PREAMBLE = """# my global config
 global:
@@ -131,7 +149,7 @@ alerting:
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  # - "first_rules.yml"
+  - "/root/alert_rules.yml"
   # - "second_rules.yml"
 
 scrape_configs:
@@ -220,6 +238,7 @@ def main():
     regenerate_ansible_inventory(config)
     regenerate_prometheus_config(config)
     regenerate_grafana_dashboards(config)
+    generate_alerts(config)
     check_ssh_keys(config)
 
 
