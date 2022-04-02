@@ -85,9 +85,9 @@ def regenerate_ssh_config(config):
 Host {instance["name"]}
     User {server["user"]}
     HostName {server["ip"]}
-    IdentityFile {server["key"]}
-
 """
+        if "key" in server:
+            ssh_config += f"""    IdentityFile {server["key"]}\n"""
     with open(SSH_CONFIG_PATH, "w") as ssh_config_file:
         ssh_config_file.write(ssh_config)
 
